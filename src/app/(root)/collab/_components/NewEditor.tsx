@@ -1,6 +1,6 @@
 "use client";
 
-import * as Y from "yjs";
+// import * as Y from "yjs";
 import { getYjsProviderForRoom } from "@liveblocks/yjs";
 import { useRoom } from "@liveblocks/react";
 import { useCallback, useEffect, useState } from "react";
@@ -21,7 +21,7 @@ import ShareSnippetDialog from "../../_components/ShareSnippetDialog";
 function NewCollaborativeEditor() {
   const clerk = useClerk();
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
-  const { language, theme, fontSize, editor, setFontSize, setEditor } = useCodeEditorStore();
+  const { language, theme, fontSize, setFontSize } = useCodeEditorStore();
   const mounted = useMounted();
   const room = useRoom();
   const yProvider = getYjsProviderForRoom(room);
@@ -30,8 +30,8 @@ function NewCollaborativeEditor() {
   useEffect(() => {
     const savedCode = localStorage.getItem(`editor-code-${language}`);
     const newCode = savedCode || LANGUAGE_CONFIG[language].defaultCode;
-    if (editor) editor.setValue(newCode);
-  }, [language, editor]);
+    editorRef?.setValue(newCode);
+  }, [language, editorRef]);
 
   useEffect(() => {
     const savedFontSize = localStorage.getItem("editor-font-size");
@@ -41,19 +41,16 @@ function NewCollaborativeEditor() {
   useEffect(() => {
     if (!editorRef) return;
 
-    let binding: MonacoBinding;
     const yDoc = yProvider.getYDoc();
     const yText = yDoc.getText("monaco");
-    
-    if (editorRef.getModel()) {
-      binding = new MonacoBinding(
-        yText,
-        editorRef.getModel() as editor.ITextModel,
-        new Set([editorRef]),
-        yProvider.awareness as Awareness
-      );
-    }
-    
+
+    const binding = new MonacoBinding(
+      yText,
+      editorRef.getModel() as editor.ITextModel,
+      new Set([editorRef]),
+      yProvider.awareness as Awareness
+    );
+
     return () => {
       binding?.destroy();
     };
@@ -61,7 +58,7 @@ function NewCollaborativeEditor() {
 
   const handleRefresh = () => {
     const defaultCode = LANGUAGE_CONFIG[language].defaultCode;
-    if (editor) editor.setValue(defaultCode);
+    editorRef?.setValue(defaultCode);
     localStorage.removeItem(`editor-code-${language}`);
   };
 
@@ -77,8 +74,7 @@ function NewCollaborativeEditor() {
 
   const handleOnMount = useCallback((editorInstance: editor.IStandaloneCodeEditor) => {
     setEditorRef(editorInstance);
-    setEditor(editorInstance);
-  }, [setEditor]);
+  }, []);
 
   if (!mounted) return null;
 
@@ -118,7 +114,7 @@ function NewCollaborativeEditor() {
           </div>
         </div>
         <div className="relative group rounded-xl overflow-hidden ring-1 ring-white/[0.05]">
-          {clerk.loaded && (
+          {clerk.loaded ? (
             <Editor
               height="600px"
               language={LANGUAGE_CONFIG[language].monacoLanguage}
@@ -128,8 +124,9 @@ function NewCollaborativeEditor() {
               onMount={handleOnMount}
               options={{ minimap: { enabled: false }, fontSize, automaticLayout: true }}
             />
+          ) : (
+            <EditorPanelSkeleton />
           )}
-          {!clerk.loaded && <EditorPanelSkeleton />}
         </div>
       </div>
       {isShareDialogOpen && <ShareSnippetDialog onClose={() => setIsShareDialogOpen(false)} />}
