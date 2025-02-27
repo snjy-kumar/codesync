@@ -421,9 +421,10 @@ export const THEME_DEFINITONS = {
 
 // Helper function to define themes in Monaco
 export const defineMonacoThemes = (monaco: Monaco) => {
+  type BuiltinTheme = 'vs' | 'vs-dark' | 'hc-black' | 'hc-light';
   Object.entries(THEME_DEFINITONS).forEach(([themeName, themeData]) => {
     monaco.editor.defineTheme(themeName, {
-      base: themeData.base,
+      base: themeData.base  as BuiltinTheme,
       inherit: themeData.inherit,
       rules: themeData.rules.map((rule) => ({
         ...rule,

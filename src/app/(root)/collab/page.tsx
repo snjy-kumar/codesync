@@ -1,12 +1,16 @@
 "use client";
-
+import dynamic from 'next/dynamic'
 import {
   LiveblocksProvider,
   RoomProvider,
   ClientSideSuspense,
 } from "@liveblocks/react/suspense";
 // import { CollaborativeEditor } from "./_components/Editor";
-import NewCollaborativeEditor from "./_components/NewEditor";
+// import NewCollaborativeEditor from "./_components/NewEditor";
+const NewCollaborativeEditor = dynamic(
+  () => import('./_components/NewEditor'),
+  { ssr: false } // This ensures the component only loads on the client side
+)
 
 export default function EditorApp() {
   return (
