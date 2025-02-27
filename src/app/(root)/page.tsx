@@ -1,7 +1,7 @@
 
-import EditorPanel from "./_components/EditorPanel";
 import Header from "./_components/Header";
 import OutputPanel from "./_components/OutputPanel";
+import EditorApp from "./collab/page";
 
 
 export default function Home() {
@@ -11,7 +11,7 @@ export default function Home() {
         <Header />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <EditorPanel />
+          <EditorApp />
           <OutputPanel />
         </div>
       </div>
